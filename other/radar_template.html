@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{{ title }}</title>
+    <style>
+      #radar_time, #radar_age {
+          position: fixed;
+          font-family: monospace;
+          background-color: rgba(255, 255, 255, 0.8);
+          font-size: 300%;
+          padding: 8px;
+          top: 0px;
+          z-index: 2;
+      }
+      .layer {
+          position: absolute;
+      }
+    </style>
+    <script>
+      var frame_index = 0;
+      var frame_timer;
+      function next_frame() {
+          var frames = document.getElementsByClassName("radar");
+          var radar_time = document.getElementById("radar_time");
+          var radar_age = document.getElementById("radar_age");
+          frames[frame_index].style.visibility = "hidden";
+          frame_index = (frame_index + 1) % frames.length;
+          age = Date.now() - frames[frame_index].dataset.time_ms;
+          radar_age.innerHTML = Math.ceil(age / 60000.) + ' minutes ago';
+          radar_time.innerHTML = frames[frame_index].dataset.time;
+          frames[frame_index].style.visibility = "visible";
+          if (frame_index + 1 == frames.length) {
+              display_time = 2000;
+          } else {
+              time_elapsed = (frames[frame_index + 1].dataset.time_ms -
+                              frames[frame_index].dataset.time_ms)
+              display_time = time_elapsed / 600.;
+          }
+          frame_timer = setTimeout(next_frame, display_time);
+      }
+    </script>
+  </head>
+  <body style="margin:0px" onload="next_frame()">
+    <div id="radar_time" style="left:0px"></div>
+    <div id="radar_age" style="right:0px"></div>
+    <img class="layer" style="z-index:-1" src="base_map.png">
+    <img class="layer" style="z-index:1" src="overlay_map.png">
+    {%- for frame in frames %}
+    <img class="layer radar" style="visibility:hidden"
+         {%- for key in frame %}
+         {{ key }}="{{ frame[key] }}"
+         {%- endfor %}/>
+    {%- endfor %}
+  </body>
+</html>
