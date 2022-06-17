@@ -12,10 +12,10 @@ import metpy.io, metpy.plots
 logging.disable(logging.NOTSET)
 
 def level3_to_png(radar_file, lat_min, lat_max, lon_min, lon_max,
-                  x_res, y_res, min_signal_dBZ=0):
+                x_res, y_res, min_signal_dBZ=0):
     # Open radar file and extract the data array.
     f = (radar_file if type(radar_file) == metpy.io.Level3File else
-         metpy.io.Level3File(radar_file))
+        metpy.io.Level3File(radar_file))
     data = f.map_data(f.sym_block[0][0]['data'])  # data is now in dBZ
     with numpy.errstate(invalid='ignore'):  # ignore existing NaNs
         data[data < min_signal_dBZ] = numpy.nan  # mask out low values
@@ -23,7 +23,7 @@ def level3_to_png(radar_file, lat_min, lat_max, lon_min, lon_max,
     # Compute the azimuth and distance at the *corners* of each sample.
     # azimuth is in degrees and distance is in meters.
     azimuth = numpy.concatenate([f.sym_block[0][0]['start_az'],
-                                 [f.sym_block[0][0]['end_az'][-1]]])
+                                [f.sym_block[0][0]['end_az'][-1]]])
     distance = numpy.linspace(0, f.max_range * 1000, data.shape[-1] + 1)
 
     # Project to EPSG3857 (i.e. "Web Mercator") X and Y coordinates.
@@ -40,7 +40,7 @@ def level3_to_png(radar_file, lat_min, lat_max, lon_min, lon_max,
     # Generate the output plot.
     import matplotlib.pyplot
     fig = matplotlib.pyplot.figure(frameon=False, dpi=256,
-                                   figsize=(x_res / 256., y_res / 256.))
+                                figsize=(x_res / 256., y_res / 256.))
     ax = matplotlib.pyplot.Axes(fig, [0, 0, 1, 1],
                                 xlim=(xmin, xmax), ylim=(ymin, ymax))
     ax.set_axis_off()
@@ -79,6 +79,6 @@ if __name__ == '__main__':
                         help='vertical resolution of output image')
     opts = parser.parse_args()
     image = level3_to_png(opts.radar, opts.lat_min, opts.lat_max,
-                          opts.lon_min, opts.lon_max,
-                          opts.x_res, opts.y_res)
+                        opts.lon_min, opts.lon_max,
+                        opts.x_res, opts.y_res)
     image.save(opts.out)
